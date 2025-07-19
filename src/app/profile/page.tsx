@@ -155,7 +155,7 @@ export default function Profile() {
             className="w-50 h-50 text-large"
             src={from?.image || "/img/Avatar.png"}
           />
-          <div className="flex flex-col justify-start items-start gap-4 text-xl font-medium">
+          <div className="flex flex-col justify-start items-start gap-4 text-lg font-medium">
             <input type="hidden" id="email" name="email" value={from.email} />
             <p className="text-gray-700">
               {"ชื่อ : "}
@@ -173,7 +173,7 @@ export default function Profile() {
               {"ผู้ซื้อของ : "}
               {isBuyer === "success" ? (
                 <div className=" w-full absolute top-0 right-[-90px]">
-                  <span className="p-4 rounded-xl bg-gray-200 text-medium">
+                  <span className="p-2 sm:p-4 rounded-xl bg-gray-200 text-medium">
                     {from.buyer}
                   </span>
                   {/* <button

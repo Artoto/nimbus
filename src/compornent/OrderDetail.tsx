@@ -210,12 +210,12 @@ export default function OrderDetailView({
               className="flex justify-start items-center gap-2"
             >
               <IconArrowLeft width="40" height="40" />
-              <span className="text-xl sm:text-2xl text-gray-600 underline underline-offset-1">
+              <span className="text-lg sm:text-2xl text-gray-600 underline underline-offset-1">
                 Manage Order
               </span>
             </Link>
             {` / `}
-            <span className="text-xl sm:text-2xl text-gray-600 underline underline-offset-1">
+            <span className="text-lg sm:text-2xl text-gray-600 underline underline-offset-1">
               {`${order_id === "create" ? `Create Order` : `Order Detail`}`}
             </span>
           </div>
@@ -227,7 +227,7 @@ export default function OrderDetailView({
                   type="text"
                   id="order_name"
                   name="order_name"
-                  className="form-input basis-full sm:basis-9/12"
+                  className="form-input w-full sm:basis-9/12"
                   autoComplete="off"
                   value={orderTitle}
                   onChange={hamdleOrderTitle}
@@ -238,7 +238,7 @@ export default function OrderDetailView({
                   type="text"
                   id="order_name"
                   name="order_name"
-                  className="form-input basis-full sm:basis-9/12"
+                  className="form-input w-full sm:basis-9/12"
                   autoComplete="off"
                   value={orderTitle}
                   onChange={hamdleOrderTitle}
@@ -272,7 +272,7 @@ export default function OrderDetailView({
                       <input
                         type="text"
                         name="material_name"
-                        className="form-input basis-full sm:basis-9/12"
+                        className="form-input w-full sm:basis-9/12"
                         value={order.material_name}
                         onChange={(e) => hendleChangeUpdateOrder(index, e)}
                         required
@@ -283,7 +283,7 @@ export default function OrderDetailView({
                       <input
                         type="text"
                         name="material_name"
-                        className="form-input basis-full sm:basis-9/12"
+                        className="form-input w-full sm:basis-9/12"
                         value={order.material_name}
                         onChange={(e) => hendleChangeUpdateOrder(index, e)}
                         required
@@ -297,7 +297,7 @@ export default function OrderDetailView({
                       <input
                         type="number"
                         name="quantity"
-                        className="form-input basis-full sm:basis-9/12"
+                        className="form-input w-full sm:basis-9/12"
                         value={order.quantity}
                         onChange={(e) => hendleChangeUpdateOrder(index, e)}
                         required
@@ -309,7 +309,7 @@ export default function OrderDetailView({
                         type="text"
                         pattern="[0-9]*"
                         name="quantity"
-                        className="form-input basis-full sm:basis-9/12"
+                        className="form-input w-full sm:basis-9/12"
                         value={order.quantity}
                         onChange={(e) => hendleChangeUpdateOrder(index, e)}
                         required
@@ -326,7 +326,7 @@ export default function OrderDetailView({
                         <input
                           type="number"
                           name="price"
-                          className="form-input basis-full sm:basis-9/12"
+                          className="form-input w-full sm:basis-9/12"
                           value={order.price}
                           onChange={(e) => hendleChangeUpdateOrder(index, e)}
                           required
@@ -339,7 +339,7 @@ export default function OrderDetailView({
                         <input
                           type="text"
                           name="remark"
-                          className="form-input basis-full sm:basis-9/12"
+                          className="form-input w-full sm:basis-9/12"
                           value={order.remark}
                           onChange={(e) => hendleChangeUpdateOrder(index, e)}
                           required

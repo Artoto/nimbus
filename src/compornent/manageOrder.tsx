@@ -64,14 +64,14 @@ export default function ManageOrder({ orders, role }: OrderProps) {
       <div className="flex justify-center items-center my-20 text-gray-900">
         <div className="flex flex-col justify-start items-start border bg-white shadow-xl max-w-5xl w-[90%] h-[90%] rounded-xl py-4 px-5 gap-4">
           <div className="flex justify-between gap-2 items-center w-full">
-            <h1 className="text-xl sm:text-3xl">Manage Order</h1>
+            <h1 className="text-medium sm:text-2xl">Manage Order</h1>
             <Link
               href="/manage/create"
               className={`${
                 role === "buyer" ? `hidden` : `flex`
-              } justify-center items-center gap-1 bg-green-400 text-white hover:bg-white hover:text-green-400 hover:border hover:border-solid hover:border-green-400 py-2 px-4 rounded-xl  text-lg sm:text-xl`}
+              } justify-center items-center gap-1 bg-green-400 text-white hover:bg-white hover:text-green-400 hover:border hover:border-solid hover:border-green-400 py-2 px-4 rounded-xl  text-medium sm:text-xl`}
             >
-              <IconPlus width="35" height="35" />
+              <IconPlus width="30" height="30" />
               Create Order
             </Link>
           </div>

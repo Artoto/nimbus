@@ -100,12 +100,13 @@ export async function createNewOrder(
       }
       const recordsDataOrder = addOrder.map((item) => ({
         require: {
-          order_id: getOrder[0]?.order_id, // Assuming order_id uniquely identifies the main order
+          material_id: crypto.randomUUID(), //
         },
         fields: {
           material_name: item.material_name,
           quantity: item.quantity,
           buyer: session.buyer,
+          order_id: getOrder[0]?.order_id,
           orderer: session.email,
         },
       }));
@@ -198,15 +199,41 @@ export async function updateOrder(
     if (getOrder.length === 0) {
       return { success: false, message: "Failed to order id not found." };
     }
-    const recordsDataOrderDeatil = orderList.map((item) => ({
-      require: {
-        order_id: order_id, // Assuming order_id uniquely identifies the main order
-      },
-      fields: {
-        price: item.price,
-        remark: item.remark,
-      },
-    }));
+
+    const filter2 = JSON.stringify({
+      order_id: [order_id],
+      buyer: [session.email],
+    });
+    const getOrderDetail = await getGristRecords<Table1>("Table1", filter2);
+    if (getOrderDetail.length === 0) {
+      return { success: false, message: "Failed to order detail not found." };
+    }
+    const recordsDataOrderDeatil = orderList.map((item, index) => {
+      const data = getOrderDetail.filter(
+        (item2) => item2.material_name === item.material_name && item2
+      );
+      if (data.length > 0) {
+        return {
+          require: {
+            material_id: data[0]?.material_id,
+          },
+          fields: {
+            price: item.price,
+            remark: item.remark,
+          },
+        };
+      } else {
+        return {
+          require: {
+            material_id: crypto.randomUUID(),
+          },
+          fields: {
+            price: item.price,
+            remark: item.remark,
+          },
+        };
+      }
+    });
     const recordsOrderDetail = JSON.stringify({
       records: recordsDataOrderDeatil,
     });
