@@ -13,14 +13,18 @@ export default async function ManageDetail({ params }: ManageDetailPageProps) {
   const tableName1 = "Table1"; // ชื่อตาราง
   const tableName2 = "Order"; // ชื่อตาราง
   let filter = ""; // filter
+  let filter2 = ""; // filter
 
   if (orderSlug) {
     filter = encodeURIComponent(JSON.stringify({ order_id: [orderSlug] }));
   }
+  if (orderSlug) {
+    filter2 = encodeURIComponent(JSON.stringify({ order_id: [orderSlug] }));
+  }
   // ดึงข้อมูล Order
-  const ordersDetail = await getGristRecords<Table1>(tableName1, filter);
+  const ordersDetail = await getGristRecords<Table1>(tableName1, filter2);
   const orders = await getGristRecords<Order>(tableName2, filter);
-
+  console.log("ordersDetail", ordersDetail);
   return (
     <>
       <OrderDetail

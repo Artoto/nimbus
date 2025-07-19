@@ -126,7 +126,6 @@ export async function createNewOrder(
       if (getOrder.length === 0) {
         return { success: false, message: "Failed to create order." };
       }
-      console.log("getOrder", getOrder);
       if (orderTitle !== getOrder[0]?.order_name) {
         const recordsData = [
           {
@@ -140,8 +139,6 @@ export async function createNewOrder(
         ];
         const records = JSON.stringify({ records: recordsData });
         const updateOrder = await addGristRecord<Order>("Order", records);
-        console.log("records", records);
-        console.log("updateOrder", updateOrder);
         if (updateOrder) {
           return { success: false, message: "Failed to update order name." };
         }
@@ -149,14 +146,14 @@ export async function createNewOrder(
 
       const recordsDataOrderDetail = addOrder.map((item) => ({
         require: {
-          order_id: order_id, // Assuming order_id uniquely identifies the main order
+          material_id: crypto.randomUUID(), //
         },
         fields: {
+          order_id: order_id,
           material_name: item.material_name,
           quantity: item.quantity,
         },
       }));
-      console.log("recordsDataOrderDetail", recordsDataOrderDetail);
 
       const recordsOrderDetail = JSON.stringify({
         records: recordsDataOrderDetail,
@@ -165,7 +162,6 @@ export async function createNewOrder(
         "Table1",
         recordsOrderDetail
       );
-      console.log("updateOrderDetail", updateOrderDetail);
       if (updateOrderDetail) {
         return {
           success: false,
