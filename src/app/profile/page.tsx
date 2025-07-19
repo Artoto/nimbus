@@ -66,7 +66,10 @@ export default function Profile() {
           buyer: user?.buyer || localStorage.getItem("useByuer") || "",
           gristName: user?.gristName || "",
         };
-        const error = { ...isError, buyer: user?.buyer ? false : true };
+        const error = {
+          ...isError,
+          buyer: user?.buyer || localStorage.getItem("useByuer") ? false : true,
+        };
         setFrom(data);
         setIsError(error);
       } else {
@@ -157,7 +160,7 @@ export default function Profile() {
             </p>
             <div className="text-gray-700 box-border relative">
               {"ผู้ซื้อของ : "}
-              {isError?.buyer && from.buyer ? (
+              {!isError?.buyer && from.buyer ? (
                 <div className=" w-full absolute top-0 right-[-90px]">
                   <span className="p-4 rounded-xl bg-gray-200 text-medium">
                     {from.buyer}
