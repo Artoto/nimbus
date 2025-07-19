@@ -126,6 +126,7 @@ export async function createNewOrder(
       if (getOrder.length === 0) {
         return { success: false, message: "Failed to create order." };
       }
+      console.log("getOrder", getOrder);
       if (orderTitle !== getOrder[0]?.order_name) {
         const recordsData = [
           {
@@ -139,8 +140,10 @@ export async function createNewOrder(
         ];
         const records = JSON.stringify({ records: recordsData });
         const updateOrder = await addGristRecord<Order>("Order", records);
+        console.log("records", records);
+        console.log("updateOrder", updateOrder);
         if (updateOrder) {
-          return { success: false, message: "Failed to create order." };
+          return { success: false, message: "Failed to update order name." };
         }
       }
 
@@ -153,6 +156,7 @@ export async function createNewOrder(
           quantity: item.quantity,
         },
       }));
+      console.log("recordsDataOrderDetail", recordsDataOrderDetail);
 
       const recordsOrderDetail = JSON.stringify({
         records: recordsDataOrderDetail,
@@ -161,6 +165,7 @@ export async function createNewOrder(
         "Table1",
         recordsOrderDetail
       );
+      console.log("updateOrderDetail", updateOrderDetail);
       if (updateOrderDetail) {
         return {
           success: false,
