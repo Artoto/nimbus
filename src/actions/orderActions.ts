@@ -88,7 +88,6 @@ export async function createNewOrder(
         return {
           success: false,
           message: "Failed to create order.",
-          data: recordsData,
         };
       }
       const filter = JSON.stringify({
@@ -163,7 +162,11 @@ export async function createNewOrder(
         recordsOrderDetail
       );
       if (updateOrderDetail) {
-        return { success: false, message: "Failed to create order detail." };
+        return {
+          success: false,
+          message: "Failed to create order detail.",
+          data: recordsDataOrderDetail,
+        };
       }
     }
 
