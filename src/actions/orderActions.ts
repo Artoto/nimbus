@@ -2,6 +2,7 @@
 import {
   addGristRecord,
   getGristRecords,
+  delGristRecord,
   Order,
   Table1,
   User_management,
@@ -107,7 +108,7 @@ export async function createNewOrder(
           quantity: item.quantity,
           buyer: session.buyer,
           order_id: getOrder[0]?.order_id,
-          orderer: session.email,
+          order: session.email,
         },
       }));
 
@@ -154,7 +155,7 @@ export async function createNewOrder(
           material_name: item.material_name,
           quantity: item.quantity,
           buyer: session.buyer,
-          orderer: session.email,
+          order: session.email,
         },
       }));
 
@@ -359,5 +360,27 @@ export async function searchUser(
     return { message: "success", data: buyer.toString() };
   } catch (error) {
     return { message: "Error" };
+  }
+}
+
+export async function deleteOrder(delOrder: any[]): Promise<CreateOrderResult> {
+  try {
+    if (delOrder.length === 0) {
+      return { success: false, message: "Failed to delete order." };
+    }
+
+    const deleteOrder = await delGristRecord<Table1>(
+      "Table1",
+      JSON.stringify(delOrder)
+    );
+    if (deleteOrder) {
+      return { success: false, message: "Failed to delete order." };
+    }
+    return {
+      success: true,
+      message: `Order delete successfuly!`,
+    };
+  } catch (error) {
+    return { success: false, message: "Failed to delete order." };
   }
 }

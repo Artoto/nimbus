@@ -7,7 +7,7 @@ export interface Table1 {
   material_name: string;
   quantity: number;
   price: number;
-  orderer: string;
+  order: string;
   buyer: string;
   order_id: string;
   created_at: number;
@@ -100,16 +100,8 @@ export async function getGristRecords<T>(
       }));
     }
 
-    console.log(
-      `Unexpected Grist API response structure for table ${tableName}:`,
-      data
-    );
     return [];
   } catch (error) {
-    console.error(
-      `Error fetching Grist data from table '${tableName}':`,
-      error
-    );
     return [];
   }
 }
@@ -137,10 +129,34 @@ export async function addGristRecord<T>(tableName: string, records: string) {
     }
 
     const data = await response.json();
-    console.log(`Record added successfully to table '${tableName}':`, data);
     return data;
   } catch (error) {
-    console.error(`Error adding Grist record to table '${tableName}':`, error);
+    throw error;
+  }
+}
+
+export async function delGristRecord<T>(tableName: string, records: string) {
+  try {
+    const response = await fetch(`${GRIST_DOC_URL}/${tableName}/data/delete`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${GRIST_API_KEY}`,
+        "Content-Type": "application/json",
+        accept: "*/*",
+      },
+      body: records,
+    });
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(
+        `Failed to add record to Grist table '${tableName}': ${response.status} ${response.statusText} - ${errorText}`
+      );
+    }
+
+    const data = await response.json();
+
+    return data;
+  } catch (error) {
     throw error;
   }
 }

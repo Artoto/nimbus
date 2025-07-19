@@ -5,7 +5,11 @@ import React, { useState, useEffect, Suspense } from "react"; // เพิ่ม
 import Link from "next/link";
 import IconArrowLeft from "./IconArrowLeft";
 import IconPlus from "./IconPlus";
-import { createNewOrder, updateOrder } from "../actions/orderActions"; // <-- Import Server Action
+import {
+  createNewOrder,
+  updateOrder,
+  deleteOrder,
+} from "../actions/orderActions"; // <-- Import Server Action
 import IconTrash from "./IconTrash";
 import Loading from "@/app/loading";
 import Toast from "./Toast";
@@ -19,7 +23,7 @@ interface OrderDetailType {
   material_name: string;
   quantity: number;
   price: number;
-  orderer: string;
+  order: string;
   buyer: string;
   order_id: string;
   created_at: number;
@@ -51,6 +55,10 @@ interface addOrderProps {
   remark?: string;
 }
 
+interface delOrderProps {
+  id: number[];
+}
+
 interface userProps {
   name?: string | null;
   email?: string | null;
@@ -66,10 +74,15 @@ export default function OrderDetailView({
   order,
   role,
 }: OrderProps) {
+  const arrayCheck = ["create", "buyer"];
   const [orderTitle, setOrderTitle] = useState<string>("");
   const [statusMessage, setStatusMessage] = useState<string>("");
   const [isError, setIsError] = useState<boolean>(false);
+  const [isCreate, setIsCreate] = useState<boolean>(
+    arrayCheck.includes(order_id) ? false : true
+  );
   const [addOrder, setAddOrder] = useState<addOrderProps[]>([]);
+  const [delOrder, setDelOrder] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const { data: session, status } = useSession();
   const route = useRouter();
@@ -90,7 +103,7 @@ export default function OrderDetailView({
         }
         if (ordersDetail.length) {
           const data = ordersDetail.map((items, index) => ({
-            id: index + 1,
+            id: items.id,
             material_name: items.material_name || "",
             quantity: items.quantity || 0,
             price: items.price || 0,
@@ -112,6 +125,7 @@ export default function OrderDetailView({
 
       if (result.success) {
         setStatusMessage(result.message);
+        setIsCreate(true);
         // คุณอาจจะต้องการ redirect หรือ clear form ที่นี่
       } else {
         setStatusMessage(`Error: ${result.message}`);
@@ -192,8 +206,31 @@ export default function OrderDetailView({
     setAddOrder(updatedAddOrder);
   };
 
-  const handleDeleteOrder = (index: number) => {
+  const handleDeleteOrder = async (index: number) => {
     let data = [...addOrder];
+    if (isCreate) {
+      setIsLoading(true);
+      const del = [...delOrder, addOrder[index].id];
+      console.log("del", del);
+      const response = await deleteOrder(del);
+      console.log("response", response);
+      if (!response.success) {
+        setStatusMessage(response.message);
+        setIsError(true);
+        setIsLoading(false);
+        setTimeout(() => {
+          setStatusMessage("");
+          setIsError(false);
+        }, 2000);
+        return false;
+      }
+      setTimeout(() => {
+        setStatusMessage("");
+        setIsError(false);
+      }, 2000);
+      setIsLoading(false);
+    }
+
     data.splice(index, 1);
     data.map((item, index) => ({ ...item, id: index + 1 }));
     setAddOrder(data);
