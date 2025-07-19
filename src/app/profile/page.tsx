@@ -6,9 +6,10 @@ import "../style/profile.css";
 import { Avatar } from "@nextui-org/react";
 import Link from "next/link";
 import IconArrowLeft from "@/compornent/IconArrowLeft";
-import { searchUser } from "./action";
+import { searchUser } from "@/actions/orderActions";
 import IconClose from "@/compornent/IconClose";
 import Loading from "../loading";
+import Toast from "@/compornent/Toast";
 
 interface fromProps {
   name: string;
@@ -28,6 +29,7 @@ interface userProps {
 
 interface errorProps {
   buyer: boolean;
+  search?: boolean;
 }
 
 export default function Profile() {
@@ -42,12 +44,10 @@ export default function Profile() {
   });
   const [isError, setIsError] = useState<errorProps>({
     buyer: false,
+    search: false,
   });
 
-  const [isBuyer, setIsBuyer] = useState<errorProps>({
-    buyer: false,
-  });
-
+  const [isBuyer, setIsBuyer] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [messageStatus, setMessageStatus] = useState<string>("");
 
@@ -76,10 +76,9 @@ export default function Profile() {
         };
         setFrom(data);
         setIsError(error);
-        setIsBuyer({
-          ...isBuyer,
-          buyer: user?.buyer || localStorage.getItem("useByuer") ? true : false,
-        });
+        setIsBuyer(
+          user?.buyer || localStorage.getItem("useByuer") ? "success" : ""
+        );
       } else {
         signOut();
       }
@@ -107,8 +106,8 @@ export default function Profile() {
       }
 
       setIsError(newFormData);
-      setFrom({ ...from, [name]: value });
     }
+    setFrom({ ...from, [name]: value.toLowerCase() });
   };
 
   const handleKey = async (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -116,16 +115,20 @@ export default function Profile() {
       setIsLoading(true);
       const response = await searchUser(from);
       if (response.message === "success") {
-        localStorage.setItem("useByuer", response.data || "");
         setFrom({ ...from, buyer: response.data || "" });
-        setIsBuyer({ ...isBuyer, buyer: true });
+        setIsBuyer(response.message);
+        setMessageStatus(response.message);
+        localStorage.setItem("useByuer", response.data || "");
+      } else {
+        setIsError({ ...isError, search: true });
+        setMessageStatus(response.message);
       }
       setTimeout(() => {
         setIsLoading(false);
+        setIsError({ ...isError, search: false });
       }, 2000);
     }
   };
-
   const handleDeleteBuyer = () => {
     let data = {
       ...from,
@@ -168,7 +171,7 @@ export default function Profile() {
             </p>
             <div className="text-gray-700 box-border relative">
               {"ผู้ซื้อของ : "}
-              {isBuyer?.buyer ? (
+              {isBuyer === "success" ? (
                 <div className=" w-full absolute top-0 right-[-90px]">
                   <span className="p-4 rounded-xl bg-gray-200 text-medium">
                     {from.buyer}
@@ -212,6 +215,9 @@ export default function Profile() {
           </div>
         </div>
       </div>
+      {isError.search && (
+        <Toast message={messageStatus} isError={isError.search} />
+      )}
     </>
   );
 }
