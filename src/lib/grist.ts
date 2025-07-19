@@ -64,6 +64,7 @@ export async function getGristRecords<T>(
 ): Promise<T[]> {
   try {
     const apiUrl = getGristApiUrl(tableName, filter);
+    console.log("apiUrl", apiUrl);
     const response = await fetch(apiUrl, {
       method: "GET",
       headers: {
