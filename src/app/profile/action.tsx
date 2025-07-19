@@ -24,7 +24,6 @@ export async function searchUser(
   const buyer = formData.buyer;
   const email = formData.email;
   const cookieStore = cookies();
-
   if (!buyer) {
     return { message: "invalldate value" };
   }
@@ -53,6 +52,7 @@ export async function searchUser(
       path: "/",
       sameSite: "lax",
     });
+
     const records = JSON.stringify({
       records: [
         {

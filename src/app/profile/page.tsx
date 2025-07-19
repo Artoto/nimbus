@@ -44,6 +44,10 @@ export default function Profile() {
     buyer: false,
   });
 
+  const [isBuyer, setIsBuyer] = useState<errorProps>({
+    buyer: false,
+  });
+
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [messageStatus, setMessageStatus] = useState<string>("");
 
@@ -72,6 +76,10 @@ export default function Profile() {
         };
         setFrom(data);
         setIsError(error);
+        setIsBuyer({
+          ...isBuyer,
+          buyer: user?.buyer || localStorage.getItem("useByuer") ? true : false,
+        });
       } else {
         signOut();
       }
@@ -110,7 +118,7 @@ export default function Profile() {
       if (response.message === "success") {
         localStorage.setItem("useByuer", response.data || "");
         setFrom({ ...from, buyer: response.data || "" });
-        setIsError({ ...isError, buyer: false });
+        setIsBuyer({ ...isBuyer, buyer: true });
       }
       setTimeout(() => {
         setIsLoading(false);
@@ -160,7 +168,7 @@ export default function Profile() {
             </p>
             <div className="text-gray-700 box-border relative">
               {"ผู้ซื้อของ : "}
-              {!isError?.buyer && from.buyer ? (
+              {isBuyer?.buyer ? (
                 <div className=" w-full absolute top-0 right-[-90px]">
                   <span className="p-4 rounded-xl bg-gray-200 text-medium">
                     {from.buyer}
