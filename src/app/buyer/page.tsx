@@ -13,6 +13,7 @@ export default async function Buyer() {
     filter = encodeURIComponent(JSON.stringify({ buyer_list: [userEmail] }));
   }
   const orders = await getGristRecords<Order>(tableName, filter);
+
   return (
     <>
       <ManageOrder orders={orders} role="buyer" />

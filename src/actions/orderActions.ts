@@ -152,6 +152,8 @@ export async function createNewOrder(
           order_id: order_id,
           material_name: item.material_name,
           quantity: item.quantity,
+          buyer: session.buyer,
+          orderer: session.email,
         },
       }));
 
