@@ -67,7 +67,7 @@ export default function Header() {
       <Navbar className="bg-transparent shadow-lg py-5">
         <NavbarBrand>
           <Link
-            href="/"
+            href={status === "authenticated" ? `/profile` : `/`}
             className="text-2xl sm:text-3xl font-extrabold text-gray-900"
           >
             Nimbus
@@ -123,12 +123,12 @@ export default function Header() {
             </>
           ) : (
             status === "unauthenticated" && (
-              <Button
+              <button
                 onClick={() => signIn()}
                 className="py-2 px-4 bg-white text-black hover:bg-gray-100/15 hover:text-white text-lg font-semibold rounded-xl hover:border border-solid border-white"
               >
                 Sign In
-              </Button>
+              </button>
             )
           )}
         </NavbarContent>

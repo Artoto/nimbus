@@ -292,7 +292,7 @@ export default function OrderDetailView({
                     )}
                   </div>
                   <div className="flex flex-wrap justify-center items-center w-full">
-                    <p className="text-2xl basis-full sm:basis-3/12">{`รายการ : `}</p>
+                    <p className="text-2xl basis-full sm:basis-3/12">{`จำนวน : `}</p>
                     {role === "buyer" ? (
                       <input
                         type="number"
@@ -306,7 +306,8 @@ export default function OrderDetailView({
                       />
                     ) : (
                       <input
-                        type="number"
+                        type="text"
+                        pattern="[0-9]*"
                         name="quantity"
                         className="form-input basis-full sm:basis-9/12"
                         value={order.quantity}

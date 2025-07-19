@@ -7,8 +7,8 @@ import { Avatar } from "@nextui-org/react";
 import Link from "next/link";
 import IconArrowLeft from "@/compornent/IconArrowLeft";
 import { searchUser } from "./action";
-import { useFormState } from "react-dom";
 import IconClose from "@/compornent/IconClose";
+import Loading from "../loading";
 
 interface fromProps {
   name: string;
@@ -44,10 +44,8 @@ export default function Profile() {
     buyer: false,
   });
 
-  const initStatus = {
-    message: "",
-  };
-  const [searchStatus, formSearchAction] = useFormState(searchUser, initStatus);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [messageStatus, setMessageStatus] = useState<string>("");
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -65,7 +63,7 @@ export default function Profile() {
           name: user?.name || "",
           email: user?.email || "",
           image: user?.image || "",
-          buyer: user?.buyer || "",
+          buyer: user?.buyer || localStorage.getItem("useByuer") || "",
           gristName: user?.gristName || "",
         };
         const error = { ...isError, buyer: user?.buyer ? false : true };
@@ -102,11 +100,18 @@ export default function Profile() {
     }
   };
 
-  useEffect(() => {}, [isError, searchStatus]);
-
-  const handleKey = (e: React.KeyboardEvent<HTMLInputElement>) => {
+  const handleKey = async (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter") {
-      return true;
+      setIsLoading(true);
+      const response = await searchUser(from);
+      if (response.message === "success") {
+        localStorage.setItem("useByuer", response.data || "");
+        setFrom({ ...from, buyer: response.data || "" });
+        setIsError({ ...isError, buyer: false });
+      }
+      setTimeout(() => {
+        setIsLoading(false);
+      }, 2000);
     }
   };
 
@@ -120,6 +125,7 @@ export default function Profile() {
 
   return (
     <>
+      {isLoading && <Loading />}
       <div className=" flex justify-center items-center my-28 sm:my-[280px] body-manage text-black">
         <div className="bg-white max-w-7xl py-10 px-4 w-[90%] h-[90%] sm:w-[500px] flex flex-col gap-8 justify-center items-center rounded-xl shadow-xl border">
           <Link
@@ -135,10 +141,7 @@ export default function Profile() {
             className="w-50 h-50 text-large"
             src={from?.image || "/img/Avatar.png"}
           />
-          <form
-            action={formSearchAction}
-            className="flex flex-col justify-start items-start gap-4 text-xl font-medium"
-          >
+          <div className="flex flex-col justify-start items-start gap-4 text-xl font-medium">
             <input type="hidden" id="email" name="email" value={from.email} />
             <p className="text-gray-700">
               {"ชื่อ : "}
@@ -154,7 +157,7 @@ export default function Profile() {
             </p>
             <div className="text-gray-700 box-border relative">
               {"ผู้ซื้อของ : "}
-              {from.buyer ? (
+              {isError?.buyer && from.buyer ? (
                 <div className=" w-full absolute top-0 right-[-90px]">
                   <span className="p-4 rounded-xl bg-gray-200 text-medium">
                     {from.buyer}
@@ -175,9 +178,9 @@ export default function Profile() {
                   placeholder="กรอกอีเมลผู้ซื้อของ"
                   value={from.buyer}
                   onChange={handleChange}
-                  onSubmit={handleKey}
+                  onKeyDown={handleKey}
                   className={`bg-white focus:outline-none py-4 pl-5 pr-6 box-border  ${
-                    isError?.buyer
+                    isError?.buyer && !from.buyer
                       ? ` border border-solid border-red-500 rounded-xl`
                       : ``
                   }`}
@@ -195,7 +198,7 @@ export default function Profile() {
                 กรอกอีเมลผู้ซื้อของไม่ถูกต้อง
               </small>
             </div>
-          </form>
+          </div>
         </div>
       </div>
     </>

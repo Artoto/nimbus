@@ -1,19 +1,30 @@
 "use server";
 import { getGristRecords, addGristRecord, User_management } from "@/lib/grist";
+import { cookies } from "next/headers";
 
 interface SearchUserState {
   message: string;
+  data?: string;
   // อาจจะมีอย่างอื่นเพิ่มได้ เช่น foundUser: User_management | null;
 }
 
+interface fromProps {
+  name: string;
+  email: string;
+  image: string;
+  buyer: string;
+  gristName: string;
+}
+
 export async function searchUser(
-  prevState: SearchUserState | undefined,
-  formData: FormData
-) {
+  formData: fromProps
+): Promise<SearchUserState> {
   const emailPattern = /^[^\s@]+@[^\s@]+\.[A-Za-z0-9\-_.]+$/;
   const enPattern = /^[A-Za-z0-9\s/!@#$%^&*(),.\-_?":{}|<>]*$/;
-  const buyer = formData.get("buyer");
-  const email = formData.get("email");
+  const buyer = formData.buyer;
+  const email = formData.email;
+  const cookieStore = cookies();
+
   if (!buyer) {
     return { message: "invalldate value" };
   }
@@ -34,6 +45,14 @@ export async function searchUser(
     if (User_management.length === 0) {
       return { message: "User not foun" };
     }
+
+    cookieStore.set("buyer", buyer.toString(), {
+      httpOnly: true,
+      // secure: process.env.NODE_ENV === "production",
+      maxAge: 60 * 60 * 24 * 7, // 1 week
+      path: "/",
+      sameSite: "lax",
+    });
     const records = JSON.stringify({
       records: [
         {
@@ -54,7 +73,7 @@ export async function searchUser(
     if (updateUserBuyer) {
       return { message: "Error" };
     }
-    return { message: "success" };
+    return { message: "success", data: buyer.toString() };
   } catch (error) {
     return { message: "Error" };
   }
