@@ -117,7 +117,7 @@ export default function OrderDetailView({
         setStatusMessage(`Error: ${result.message}`);
       }
       setTimeout(() => {
-        setStatusMessage("");
+        // setStatusMessage("");
       }, 2000);
       setIsLoading(false);
     }

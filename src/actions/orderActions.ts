@@ -12,6 +12,7 @@ interface CreateOrderResult {
   success: boolean;
   message: string;
   orderId?: string; // ถ้ามี Order ID ที่สร้างขึ้น
+  data?: any;
 }
 
 interface orderListCartResult {
@@ -84,7 +85,11 @@ export async function createNewOrder(
       const records = JSON.stringify({ records: recordsData });
       const updateOrder = await addGristRecord<Order>("Order", records);
       if (updateOrder) {
-        return { success: false, message: "Failed to create order." };
+        return {
+          success: false,
+          message: "Failed to create order.",
+          data: recordsData,
+        };
       }
       const filter = JSON.stringify({
         order_name: [orderTitle],
