@@ -8,8 +8,8 @@ import Footer from "../compornent/Footer";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Next.js with NextAuth",
-  description: "A Next.js application with authentication using NextAuth.js",
+  title: "Nimbus",
+  description: "A Nimbus application for your flow monye wellet",
 };
 
 interface userProps {
