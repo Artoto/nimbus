@@ -15,13 +15,13 @@ export default function Auth() {
   return (
     <>
       {isLoading && <Loading />}
-      <div className=" flex justify-center items-center my-[280px]">
-        <div className="max-w-7xl border border-solid border-white py-10 px-4 w-[90%] h-[90%] sm:w-[500px] flex flex-col gap-8 justify-center items-center rounded-xl box-login">
+      <div className=" flex justify-center items-center my-32 sm:my-[280px]">
+        <div className="text-black max-w-7xl border border-solid border-black py-10 px-4 w-[90%] h-[90%] sm:w-[500px] flex flex-col gap-8 justify-center items-center rounded-xl box-login">
           <IconUser width="50" height="50" />
           <h1 className="text-2xl sm:text-3xl font-bold">Login Page</h1>
           <button
             type="button"
-            className="flex justify-center items-center gap-3 border border-solid border-white rounded-xl w-full sm:w-[400px] h-14 box-border text-xl font-semibold hover:bg-white hover:text-black"
+            className="flex justify-center items-center gap-3 border border-solid border-black rounded-xl w-full sm:w-[400px] h-14 box-border text-xl font-semibold hover:bg-white hover:text-black"
             onClick={handleClickLogin}
           >
             <IconGoogle width="24" height="24" />

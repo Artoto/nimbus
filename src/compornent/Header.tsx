@@ -68,7 +68,7 @@ export default function Header() {
         <NavbarBrand>
           <Link
             href="/"
-            className="text-2xl sm:text-3xl font-extrabold text-gray-500"
+            className="text-2xl sm:text-3xl font-extrabold text-gray-900"
           >
             Nimbus
           </Link>

@@ -102,10 +102,7 @@ export default function Profile() {
     }
   };
 
-  useEffect(() => {
-    console.log("searchStatus", searchStatus);
-    console.log("isError", isError);
-  }, [isError, searchStatus]);
+  useEffect(() => {}, [isError, searchStatus]);
 
   const handleKey = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter") {
@@ -123,7 +120,7 @@ export default function Profile() {
 
   return (
     <>
-      <div className=" flex justify-center items-center my-[280px] body-manage text-black">
+      <div className=" flex justify-center items-center my-28 sm:my-[280px] body-manage text-black">
         <div className="bg-white max-w-7xl py-10 px-4 w-[90%] h-[90%] sm:w-[500px] flex flex-col gap-8 justify-center items-center rounded-xl shadow-xl border">
           <Link
             href="/manage"
@@ -159,16 +156,16 @@ export default function Profile() {
               {"ผู้ซื้อของ : "}
               {from.buyer ? (
                 <div className=" w-full absolute top-0 right-[-90px]">
-                  <span className="p-4 rounded-xl bg-gray-200">
+                  <span className="p-4 rounded-xl bg-gray-200 text-medium">
                     {from.buyer}
                   </span>
-                  <button
+                  {/* <button
                     type="button"
                     className="absolute top-[-10px] right-[-194px]"
                     onClick={handleDeleteBuyer}
                   >
                     <IconClose width="20" height="20" />
-                  </button>
+                  </button> */}
                 </div>
               ) : (
                 <input

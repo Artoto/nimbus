@@ -11,7 +11,7 @@ export default function Toast({ message, isError }: toastProps) {
           isError
             ? `bg-red-300/60 border-red-400`
             : `bg-green-300/60 border-green-400`
-        }  text-white py-4 px-5 fixed bottom-0 right-4 rounded-xl w-96 h-[100px] z-10 transition`}
+        }  text-white py-4 px-5 fixed bottom-0 right-4 rounded-xl w-96 h-[100px] z-20 transition`}
       >
         {message}
       </div>
