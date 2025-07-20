@@ -64,7 +64,6 @@ export async function getGristRecords<T>(
 ): Promise<T[]> {
   try {
     const apiUrl = getGristApiUrl(tableName, filter);
-    console.log("apiUrl", apiUrl);
     const response = await fetch(apiUrl, {
       method: "GET",
       headers: {
@@ -124,7 +123,7 @@ export async function addGristRecord<T>(tableName: string, records: string) {
 
     if (!response.ok) {
       const errorText = await response.text();
-      throw new Error(
+      console.log(
         `Failed to add record to Grist table '${tableName}': ${response.status} ${response.statusText} - ${errorText}`
       );
     }
@@ -132,7 +131,7 @@ export async function addGristRecord<T>(tableName: string, records: string) {
     const data = await response.json();
     return data;
   } catch (error) {
-    throw error;
+    throw new Error(`Failed to add record to Grist table ${error}`);
   }
 }
 

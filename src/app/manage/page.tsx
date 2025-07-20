@@ -1,7 +1,6 @@
 "use server";
 import { getGristRecords, Order } from "@/lib/grist";
 import ManageOrder from "@/compornent/manageOrder";
-import "../style/profile.css";
 import { cookies } from "next/headers";
 
 export default async function Manage() {

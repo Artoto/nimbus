@@ -32,6 +32,8 @@ interface userProps {
 export default function ManageOrder({ orders, role }: OrderProps) {
   const { data: session, status } = useSession();
   const route = useRouter();
+  const [isLoadingOrder, setIsLoadingOrder] = useState<boolean>(false);
+
   function formatTimestampPadded(timestamp: number): string {
     const date = new Date(timestamp * 1000);
 
@@ -55,6 +57,10 @@ export default function ManageOrder({ orders, role }: OrderProps) {
         user?.email === "nongponddee@gmail.com" ||
         user?.email === "supertoplnw001@gmail.com"
       ) {
+        setIsLoadingOrder(true);
+        setTimeout(() => {
+          setIsLoadingOrder(false);
+        }, 2000);
       } else {
         signOut();
       }
@@ -86,6 +92,10 @@ export default function ManageOrder({ orders, role }: OrderProps) {
           {orders.length === 0 ? (
             <div className="p-5 text-gray-900  w-full text-center text-xl">
               Order Not Found.
+            </div>
+          ) : isLoadingOrder ? (
+            <div className="flex justify-center items-center w-full">
+              <div className="w-12 h-12 border-4 border-gray-200 border-t-blue-500 rounded-full animate-spin"></div>
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2  gap-4 w-full">

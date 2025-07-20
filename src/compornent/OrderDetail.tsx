@@ -78,6 +78,7 @@ export default function OrderDetailView({
   const [orderTitle, setOrderTitle] = useState<string>("");
   const [statusMessage, setStatusMessage] = useState<string>("");
   const [isError, setIsError] = useState<boolean>(false);
+  const [isDuplicateData, setIsDuplicateData] = useState<boolean>(false);
   const [isCreate, setIsCreate] = useState<boolean>(
     arrayCheck.includes(order_id) ? false : true
   );
@@ -116,13 +117,17 @@ export default function OrderDetailView({
       }
     }
   }, [ordersDetail, session, status, order]);
+
   // นี่คือฟังก์ชันที่เรียก Server Action เมื่อปุ่มถูกคลิก
   const handleCreateButtonClick = async () => {
     setIsLoading(true);
     if (session) {
       let user: userProps | any = session.user;
       const result = await createNewOrder(orderTitle, order_id, addOrder, user); // <-- เรียก Server Action
-
+      if (isDuplicateData) {
+        setStatusMessage("กรอกรายการซ้ำ");
+        return false;
+      }
       if (result.success) {
         setStatusMessage(result.message);
         setIsCreate(true);
@@ -134,6 +139,9 @@ export default function OrderDetailView({
         setStatusMessage("");
       }, 2000);
       setIsLoading(false);
+      if (result.success) {
+        route.push(role === "buyer" ? "/buyer" : "/manage");
+      }
     }
   };
 
@@ -142,7 +150,14 @@ export default function OrderDetailView({
     const checkPriceInOrder = addOrder.filter(
       (item) => item.price === 0 && item.remark === "" && item
     );
-
+    if (isDuplicateData) {
+      setStatusMessage("กรอกรายการซ้ำ");
+      setTimeout(() => {
+        setStatusMessage("");
+        setIsError(false);
+      }, 2000);
+      return false;
+    }
     if (checkPriceInOrder.length > 0) {
       setStatusMessage(`Please fill in the order price.`);
       setIsError(true);
@@ -170,6 +185,9 @@ export default function OrderDetailView({
         setIsError(false);
       }, 2000);
       setIsLoading(false);
+      if (result.success) {
+        route.push(role === "buyer" ? "/buyer" : "/manage");
+      }
     }
   };
 
@@ -198,6 +216,23 @@ export default function OrderDetailView({
     const { name, value } = e.target; // name จะเป็น "quantity" หรือ "material_name"
     const updatedAddOrder = [...addOrder];
     const newValue = name === "quantity" ? Number(value) : value;
+    if (name === "material_name") {
+      const searchText = updatedAddOrder.filter(
+        (item) => item.material_name === newValue && item
+      );
+      if (searchText.length > 0) {
+        setStatusMessage("กรอกรายการซ้ำ");
+        setIsDuplicateData(true);
+        setIsError(true);
+        setTimeout(() => {
+          setStatusMessage("");
+        }, 4000);
+      } else {
+        setStatusMessage("");
+        setIsDuplicateData(false);
+        setIsError(false);
+      }
+    }
     updatedAddOrder[index] = {
       ...updatedAddOrder[index], // Spread ค่าเดิมของ Object นั้นๆ
       [name]: newValue, // อัปเดตเฉพาะ field ที่เปลี่ยน
@@ -211,9 +246,7 @@ export default function OrderDetailView({
     if (isCreate) {
       setIsLoading(true);
       const del = [...delOrder, addOrder[index].id];
-      console.log("del", del);
       const response = await deleteOrder(del);
-      console.log("response", response);
       if (!response.success) {
         setStatusMessage(response.message);
         setIsError(true);
