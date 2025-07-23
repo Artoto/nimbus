@@ -15,7 +15,7 @@ export default function Auth() {
   return (
     <>
       {isLoading && <Loading />}
-      <div className=" flex justify-center items-center my-32 sm:my-[280px]">
+      <div className=" flex justify-center items-center my-32 sm:my-[170px]">
         <div className="text-black max-w-7xl border border-solid border-black py-10 px-4 w-[90%] h-[90%] sm:w-[500px] flex flex-col gap-8 justify-center items-center rounded-xl box-login">
           <IconUser width="50" height="50" />
           <h1 className="text-2xl sm:text-3xl font-bold">Login Page</h1>

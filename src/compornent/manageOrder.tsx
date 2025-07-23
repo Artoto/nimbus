@@ -5,6 +5,10 @@ import IconPlus from "@/compornent/IconPlus";
 import IconArrowLeft from "./IconArrowLeft";
 import { useSession, signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
+import { deleteOrderAll } from "@/actions/orderActions";
+import IconTrash from "./IconTrash";
+import Toast from "./Toast";
+import Loading from "@/app/loading";
 
 interface OrderDetailType {
   id: number;
@@ -32,7 +36,10 @@ interface userProps {
 export default function ManageOrder({ orders, role }: OrderProps) {
   const { data: session, status } = useSession();
   const route = useRouter();
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isLoadingOrder, setIsLoadingOrder] = useState<boolean>(false);
+  const [isDeleteError, setIsDeleteError] = useState<boolean>(false);
+  const [isDeleteMessage, setIsDeleteMessage] = useState<string>("");
 
   function formatTimestampPadded(timestamp: number): string {
     const date = new Date(timestamp * 1000);
@@ -67,8 +74,24 @@ export default function ManageOrder({ orders, role }: OrderProps) {
     }
   }, [session, status]);
 
+  const handleDaleteOrder = async (id: string) => {
+    setIsLoading(true);
+    const response = await deleteOrderAll(id);
+    setIsDeleteError(response.success);
+    setIsDeleteMessage(response.message);
+    if (response.success) {
+      route.refresh();
+    }
+    setTimeout(() => {
+      setIsDeleteError(false);
+      setIsDeleteMessage("");
+      setIsLoading(false);
+    }, 2000);
+  };
+
   return (
     <>
+      {isLoading && <Loading />}
       <div className="flex justify-center items-center my-20 text-gray-900">
         <div className="flex flex-col justify-start items-start border bg-white shadow-xl max-w-5xl w-[90%] h-[90%] rounded-xl py-3 px-4 gap-4">
           <div className="flex justify-between gap-2 items-center w-full">
@@ -100,46 +123,60 @@ export default function ManageOrder({ orders, role }: OrderProps) {
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2  gap-4 w-full">
               {orders.map((order, index) => (
-                <Link
-                  href={
-                    role === "buyer"
-                      ? `/buyer/${order.order_id}`
-                      : `/manage/${order.order_id}`
-                  }
-                  key={index}
-                  className="cursor-pointer flex flex-col justify-center items-center rounded-xl border  shadow-lg py-3 px-4 w-full"
-                >
-                  <div className="flex justify-between items-center w-full">
-                    <p className=" text-xl font-semibold text-gray-700">{`ออร์เดอร์ที่ ${
-                      index + 1
-                    }`}</p>
-                    <p className="text-xl font-semibold text-gray-700">{`${
-                      order.price_total || "0"
-                    } บาท`}</p>
-                  </div>
-                  <p className="w-full text-lg font-semibold text-gray-700">{`${order.order_name}`}</p>
-                  <div className="flex justify-between items-center w-full">
-                    <p className=" text-md font-medium text-gray-500">{`${formatTimestampPadded(
-                      order.order_created_at
-                    )}`}</p>
-                    <p
-                      className={`text-md font-medium  py-2 px-3 border border-solid ${
-                        order.status === "unapprove"
-                          ? " border-red-500 rounded-lg bg-red-200 text-red-500"
-                          : order.status === "inprogress"
-                          ? "border-orange-400 rounded-lg bg-orange-200 text-orange-400"
-                          : "border-green-500 rounded-lg bg-green-200 text-green-500"
-                      }`}
+                <div key={index} className="w-full relative">
+                  {role !== "buyer" && order.status === "unapprove" && (
+                    <button
+                      type="button"
+                      className=" absolute top-[2px] right-[2px]"
+                      onClick={() => handleDaleteOrder(order.order_id)}
                     >
-                      {order.status}
-                    </p>
-                  </div>
-                </Link>
+                      <IconTrash width="20" height="20" />
+                    </button>
+                  )}
+
+                  <Link
+                    href={
+                      role === "buyer"
+                        ? `/buyer/${order.order_id}`
+                        : `/manage/${order.order_id}`
+                    }
+                    className="cursor-pointer flex flex-col justify-center items-center rounded-xl border  shadow-lg py-3 px-4 w-full"
+                  >
+                    <div className="flex justify-between items-center w-full">
+                      <p className=" text-xl font-semibold text-gray-700">{`ออร์เดอร์ที่ ${
+                        index + 1
+                      }`}</p>
+                      <p className="text-xl font-semibold text-gray-700">{`${
+                        order.price_total || "0"
+                      } บาท`}</p>
+                    </div>
+                    <p className="w-full text-lg font-semibold text-gray-700">{`${order.order_name}`}</p>
+                    <div className="flex justify-between items-center w-full">
+                      <p className=" text-md font-medium text-gray-500">{`${formatTimestampPadded(
+                        order.order_created_at
+                      )}`}</p>
+                      <p
+                        className={`text-md font-medium  py-2 px-3 border border-solid ${
+                          order.status === "unapprove"
+                            ? " border-red-500 rounded-lg bg-red-200 text-red-500"
+                            : order.status === "inprogress"
+                            ? "border-orange-400 rounded-lg bg-orange-200 text-orange-400"
+                            : "border-green-500 rounded-lg bg-green-200 text-green-500"
+                        }`}
+                      >
+                        {order.status}
+                      </p>
+                    </div>
+                  </Link>
+                </div>
               ))}
             </div>
           )}
         </div>
       </div>
+      {isDeleteMessage && (
+        <Toast isError={isDeleteError} message={isDeleteMessage} />
+      )}
     </>
   );
 }

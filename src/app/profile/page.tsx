@@ -140,7 +140,7 @@ export default function Profile() {
   return (
     <>
       {isLoading && <Loading />}
-      <div className=" flex justify-center items-center my-20 sm:my-[280px] body-manage text-black">
+      <div className=" flex justify-center items-center my-20 sm:my-[170px] body-manage text-black">
         <div className="bg-white max-w-7xl py-10 px-4 w-[90%] h-[90%] sm:w-[500px] flex flex-col gap-8 justify-center items-center rounded-xl shadow-xl border">
           <Link
             href="/manage"

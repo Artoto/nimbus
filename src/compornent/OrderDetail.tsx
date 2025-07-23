@@ -9,6 +9,7 @@ import {
   createNewOrder,
   updateOrder,
   deleteOrder,
+  updateOrderStatus,
 } from "../actions/orderActions"; // <-- Import Server Action
 import IconTrash from "./IconTrash";
 import Loading from "@/app/loading";
@@ -40,11 +41,23 @@ interface Order {
   order_list: string;
 }
 
+interface Menu {
+  id: number;
+  mo_id: string;
+  mo_name: string;
+  mo_price: number;
+  mo_quantity: number;
+  mo_created_at: number;
+  mo_updated_at: number;
+  menu_id: number;
+}
+
 interface OrderProps {
   order: Order[];
   ordersDetail: OrderDetailType[];
   order_id: string;
   role?: string;
+  menu: Menu[];
 }
 
 interface addOrderProps {
@@ -73,6 +86,7 @@ export default function OrderDetailView({
   order_id,
   order,
   role,
+  menu,
 }: OrderProps) {
   const arrayCheck = ["create", "buyer"];
   const [orderTitle, setOrderTitle] = useState<string>("");
@@ -191,6 +205,26 @@ export default function OrderDetailView({
     }
   };
 
+  const handleUpdateStatusOrderMenu = async () => {
+    setIsLoading(true);
+    const result = await updateOrderStatus(order_id); // <-- เรียก Server Action
+
+    if (result.success) {
+      setIsError(false);
+      setStatusMessage(result.message);
+    } else {
+      setIsError(true);
+      setStatusMessage(`Error: ${result.message}`);
+    }
+    setTimeout(() => {
+      setStatusMessage("");
+      setIsError(false);
+    }, 2000);
+    setIsLoading(false);
+    if (result.success) {
+      route.push(role === "buyer" ? "/buyer" : "/manage");
+    }
+  };
   const hamdleAddFormOrder = () => {
     setAddOrder((prevAddOrder) => [
       ...prevAddOrder,
@@ -317,109 +351,172 @@ export default function OrderDetailView({
             </div>
           </div>
           <div className="flex flex-col justify-center items-center w-full gap-4">
-            {addOrder.length > 0 &&
-              addOrder.map((order, index) => (
-                <div
-                  key={index}
-                  className="p-4 border shadow-lg max-w-3xl rounded-xl flex flex-col gap-3 justify-center items-center w-full relative"
-                >
-                  <button
-                    type="button"
-                    className="absolute top-1 right-1 text-red-500 transition duration-300 transform hover:scale-110"
-                    onClick={() => handleDeleteOrder(index)}
+            {menu.length > 0
+              ? menu.map((menus, index) => (
+                  <div
+                    key={index}
+                    className="p-4 border shadow-lg max-w-3xl rounded-xl flex flex-col gap-3 justify-center items-center w-full relative"
                   >
-                    <IconTrash width="35" height="35" />
-                  </button>
-                  <h1 className="text-2xl w-full text-left">{`ออร์เดอร์ที่ ${
-                    index + 1
-                  }`}</h1>
-                  {role !== "buyer" && order.remark && (
-                    <p className="text-lg w-full text-left">{order.remark}</p>
-                  )}
-                  <div className="flex flex-wrap justify-center items-center w-full">
-                    <p className="text-2xl basis-full sm:basis-3/12">{`รายการ : `}</p>
-                    {role === "buyer" ? (
-                      <input
-                        type="text"
-                        name="material_name"
-                        className="form-input w-full sm:basis-9/12"
-                        value={order.material_name}
-                        onChange={(e) => hendleChangeUpdateOrder(index, e)}
-                        required
-                        autoComplete="off"
-                        readOnly
-                      />
-                    ) : (
-                      <input
-                        type="text"
-                        name="material_name"
-                        className="form-input w-full sm:basis-9/12"
-                        value={order.material_name}
-                        onChange={(e) => hendleChangeUpdateOrder(index, e)}
-                        required
-                        autoComplete="off"
-                      />
-                    )}
-                  </div>
-                  <div className="flex flex-wrap justify-center items-center w-full">
-                    <p className="text-2xl basis-full sm:basis-3/12">{`จำนวน : `}</p>
-                    {role === "buyer" ? (
-                      <input
-                        type="number"
-                        name="quantity"
-                        className="form-input w-full sm:basis-9/12"
-                        value={order.quantity}
-                        onChange={(e) => hendleChangeUpdateOrder(index, e)}
-                        required
-                        autoComplete="off"
-                        readOnly
-                      />
-                    ) : (
-                      <input
-                        type="text"
-                        pattern="[0-9]*"
-                        name="quantity"
-                        className="form-input w-full sm:basis-9/12"
-                        value={order.quantity}
-                        onChange={(e) => hendleChangeUpdateOrder(index, e)}
-                        required
-                        min={0}
-                        autoComplete="off"
-                      />
-                    )}
-                  </div>
-
-                  {role === "buyer" && (
-                    <>
-                      <div className="flex flex-wrap justify-center items-center w-full">
-                        <p className="text-2xl basis-full sm:basis-3/12">{`ราคา : `}</p>
+                    <button
+                      type="button"
+                      className="absolute top-1 right-1 text-red-500 transition duration-300 transform hover:scale-110"
+                      onClick={() => handleDeleteOrder(index)}
+                    >
+                      <IconTrash width="35" height="35" />
+                    </button>
+                    <h1 className="text-2xl w-full text-left">{`ออร์เดอร์ที่ ${
+                      index + 1
+                    }`}</h1>
+                    <div className="flex flex-wrap justify-center items-center w-full">
+                      <p className="text-2xl basis-full sm:basis-3/12">{`รายการ : `}</p>
+                      {role === "buyer" && (
+                        <input
+                          type="text"
+                          name="material_name"
+                          className="form-input w-full sm:basis-9/12"
+                          value={menus.mo_name}
+                          required
+                          autoComplete="off"
+                          readOnly
+                        />
+                      )}
+                    </div>
+                    <div className="flex flex-wrap justify-center items-center w-full">
+                      <p className="text-2xl basis-full sm:basis-3/12">{`จำนวน : `}</p>
+                      {role === "buyer" && (
                         <input
                           type="number"
-                          name="price"
+                          name="quantity"
                           className="form-input w-full sm:basis-9/12"
-                          value={order.price}
+                          value={menus.mo_quantity}
+                          required
+                          autoComplete="off"
+                          readOnly
+                        />
+                      )}
+                    </div>
+
+                    {role === "buyer" && (
+                      <>
+                        <div className="flex flex-wrap justify-center items-center w-full">
+                          <p className="text-2xl basis-full sm:basis-3/12">{`ราคา : `}</p>
+                          <input
+                            type="number"
+                            name="price"
+                            className="form-input w-full sm:basis-9/12"
+                            value={menus.mo_price}
+                            readOnly
+                            min={0}
+                            autoComplete="off"
+                          />
+                        </div>
+                      </>
+                    )}
+                  </div>
+                ))
+              : addOrder.length > 0 &&
+                addOrder.map((order, index) => (
+                  <div
+                    key={index}
+                    className="p-4 border shadow-lg max-w-3xl rounded-xl flex flex-col gap-3 justify-center items-center w-full relative"
+                  >
+                    <button
+                      type="button"
+                      className="absolute top-1 right-1 text-red-500 transition duration-300 transform hover:scale-110"
+                      onClick={() => handleDeleteOrder(index)}
+                    >
+                      <IconTrash width="35" height="35" />
+                    </button>
+                    <h1 className="text-2xl w-full text-left">{`ออร์เดอร์ที่ ${
+                      index + 1
+                    }`}</h1>
+                    {role !== "buyer" && order.remark && (
+                      <p className="text-lg w-full text-left">{order.remark}</p>
+                    )}
+                    <div className="flex flex-wrap justify-center items-center w-full">
+                      <p className="text-2xl basis-full sm:basis-3/12">{`รายการ : `}</p>
+                      {role === "buyer" ? (
+                        <input
+                          type="text"
+                          name="material_name"
+                          className="form-input w-full sm:basis-9/12"
+                          value={order.material_name}
+                          onChange={(e) => hendleChangeUpdateOrder(index, e)}
+                          required
+                          autoComplete="off"
+                          readOnly
+                        />
+                      ) : (
+                        <input
+                          type="text"
+                          name="material_name"
+                          className="form-input w-full sm:basis-9/12"
+                          value={order.material_name}
+                          onChange={(e) => hendleChangeUpdateOrder(index, e)}
+                          required
+                          autoComplete="off"
+                        />
+                      )}
+                    </div>
+                    <div className="flex flex-wrap justify-center items-center w-full">
+                      <p className="text-2xl basis-full sm:basis-3/12">{`จำนวน : `}</p>
+                      {role === "buyer" ? (
+                        <input
+                          type="number"
+                          name="quantity"
+                          className="form-input w-full sm:basis-9/12"
+                          value={order.quantity}
+                          onChange={(e) => hendleChangeUpdateOrder(index, e)}
+                          required
+                          autoComplete="off"
+                          readOnly
+                        />
+                      ) : (
+                        <input
+                          type="text"
+                          pattern="[0-9]*"
+                          name="quantity"
+                          className="form-input w-full sm:basis-9/12"
+                          value={order.quantity}
                           onChange={(e) => hendleChangeUpdateOrder(index, e)}
                           required
                           min={0}
                           autoComplete="off"
                         />
-                      </div>
-                      <div className="flex flex-wrap justify-center items-center w-full">
-                        <p className="text-2xl basis-full sm:basis-3/12">{`หมายเหตุ : `}</p>
-                        <input
-                          type="text"
-                          name="remark"
-                          className="form-input w-full sm:basis-9/12"
-                          value={order.remark}
-                          onChange={(e) => hendleChangeUpdateOrder(index, e)}
-                          required
-                          autoComplete="off"
-                        />
-                      </div>
-                    </>
-                  )}
-                </div>
-              ))}
+                      )}
+                    </div>
+
+                    {role === "buyer" && (
+                      <>
+                        <div className="flex flex-wrap justify-center items-center w-full">
+                          <p className="text-2xl basis-full sm:basis-3/12">{`ราคา : `}</p>
+                          <input
+                            type="number"
+                            name="price"
+                            className="form-input w-full sm:basis-9/12"
+                            value={order.price}
+                            onChange={(e) => hendleChangeUpdateOrder(index, e)}
+                            required
+                            min={0}
+                            autoComplete="off"
+                          />
+                        </div>
+                        <div className="flex flex-wrap justify-center items-center w-full">
+                          <p className="text-2xl basis-full sm:basis-3/12">{`หมายเหตุ : `}</p>
+                          <input
+                            type="text"
+                            name="remark"
+                            className="form-input w-full sm:basis-9/12"
+                            value={order.remark}
+                            onChange={(e) => hendleChangeUpdateOrder(index, e)}
+                            required
+                            autoComplete="off"
+                          />
+                        </div>
+                      </>
+                    )}
+                  </div>
+                ))}
 
             {addOrder.length > 0 && (
               <button
@@ -428,6 +525,8 @@ export default function OrderDetailView({
                 onClick={
                   role === "buyer"
                     ? handleUpdateButtonClick
+                    : menu.length > 0 && role === "buyer"
+                    ? handleUpdateStatusOrderMenu
                     : handleCreateButtonClick
                 }
               >

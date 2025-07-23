@@ -13,6 +13,7 @@ export interface Table1 {
   created_at: number;
   updated_at: number;
   remark: string;
+  menu_id: string;
 }
 
 export interface Order {
@@ -35,6 +36,26 @@ export interface User_management {
   um_created_at: number;
   um_updated_at: number;
   buyer: string;
+}
+
+export interface Menu {
+  id: number;
+  menu_id: string;
+  menu_name: string;
+  menu_price: number;
+  menu_created_at: number;
+  menu_updated_at: number;
+}
+
+export interface Menu_detail {
+  id: number;
+  mo_id: string;
+  mo_name: string;
+  mo_price: number;
+  mo_quantity: number;
+  mo_created_at: number;
+  mo_updated_at: number;
+  menu_id: number;
 }
 
 // 2. กำหนด Type รวมสำหรับ GristRecord ทั้งหมด (ใช้ในฟังก์ชันทั่วไป)
@@ -124,6 +145,9 @@ export async function addGristRecord<T>(tableName: string, records: string) {
     if (!response.ok) {
       const errorText = await response.text();
       console.log(
+        `Failed to add record to Grist table '${tableName}': ${response.status} ${response.statusText} - ${errorText}`
+      );
+      throw new Error(
         `Failed to add record to Grist table '${tableName}': ${response.status} ${response.statusText} - ${errorText}`
       );
     }

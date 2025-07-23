@@ -6,6 +6,8 @@ import {
   Order,
   Table1,
   User_management,
+  Menu,
+  Menu_detail,
 } from "@/lib/grist";
 import { cookies } from "next/headers";
 
@@ -48,7 +50,6 @@ interface userProps2 {
 interface SearchUserState {
   message: string;
   data?: string;
-  // อาจจะมีอย่างอื่นเพิ่มได้ เช่น foundUser: User_management | null;
 }
 
 interface fromProps {
@@ -58,6 +59,20 @@ interface fromProps {
   buyer: string;
   gristName: string;
 }
+
+interface addMenuProps {
+  id: number;
+  name: string;
+  quantity: number;
+  price: number;
+}
+
+interface addMenuState {
+  success: boolean;
+  message: string;
+  data?: string;
+}
+
 export async function createNewOrder(
   orderTitle: string,
   order_id: string,
@@ -382,5 +397,261 @@ export async function deleteOrder(delOrder: any[]): Promise<CreateOrderResult> {
     };
   } catch (error) {
     return { success: false, message: "Failed to delete order." };
+  }
+}
+
+export async function createNewMenu(
+  menuTitle: string,
+  menu_id: string,
+  formData: addMenuProps[]
+): Promise<addMenuState> {
+  try {
+    if (formData.length === 0 || !menu_id || !menuTitle) {
+      return { success: false, message: "invalldate value" };
+    }
+    const tableMenu = "Manu";
+    const tableMenuDetail = "Menu_detail";
+    if (menu_id === "create") {
+      const sum = formData.reduce((acc, item) => acc + item.price, 0);
+
+      const randomMenuId = crypto.randomUUID();
+      const recordsMenu = [
+        {
+          require: {
+            menu_id: randomMenuId,
+          },
+          fields: {
+            menu_name: menuTitle,
+            menu_price: sum,
+          },
+        },
+      ];
+      const records = JSON.stringify({ records: recordsMenu });
+      const addMenu = await addGristRecord<Menu>(tableMenu, records);
+      if (addMenu !== null) {
+        return { success: false, message: "Fail Create Menu." };
+      }
+      const recordsMenuDetail = formData.map((item, index) => ({
+        require: {
+          mo_id: crypto.randomUUID(),
+        },
+        fields: {
+          menu_id: randomMenuId,
+          mo_name: item.name,
+          mo_price: item.price,
+          mo_quantity: item.quantity,
+        },
+      }));
+      const recordsDetail = JSON.stringify({ records: recordsMenuDetail });
+      const addMenuDetail = await addGristRecord<Menu_detail>(
+        tableMenuDetail,
+        recordsDetail
+      );
+      if (addMenuDetail !== null) {
+        return { success: false, message: "Fail Create Menu Detail." };
+      }
+    } else {
+      const recordsGetDataMenu = JSON.stringify({ menu_id: [menu_id] });
+      const getMenuCheckData = await getGristRecords<Menu>(
+        tableMenu,
+        recordsGetDataMenu
+      );
+      if (getMenuCheckData.length === 0) {
+        return { success: false, message: "Menu data not found." };
+      }
+      const recordsMenuDetail = formData.map((item, index) => ({
+        require: {
+          mo_name: item.name,
+        },
+        fields: {
+          menu_id: getMenuCheckData[0]?.menu_id,
+          mo_name: item.name,
+          mo_price: item.price,
+          mo_quantity: item.quantity,
+        },
+      }));
+      const recordsDetail = JSON.stringify({ records: recordsMenuDetail });
+      const addMenuDetail = await addGristRecord<Menu_detail>(
+        tableMenuDetail,
+        recordsDetail
+      );
+      if (addMenuDetail !== null) {
+        return { success: false, message: "Fail Create Menu Detail." };
+      }
+      const sum = formData.reduce((acc, item) => acc + item.price, 0);
+      const recordsMenu = [
+        {
+          require: {
+            menu_id: getMenuCheckData[0]?.menu_id,
+          },
+          fields: {
+            menu_price: sum,
+          },
+        },
+      ];
+      const records = JSON.stringify({ records: recordsMenu });
+      const addMenu = await addGristRecord<Menu>(tableMenu, records);
+      if (addMenu !== null) {
+        return { success: false, message: "Fail Create Menu." };
+      }
+    }
+    return { success: true, message: "Menu Create Successfuly." };
+  } catch (error) {
+    return { success: false, message: `Error :${error}` };
+  }
+}
+
+export async function addMenuInCart(
+  menu_id: string,
+  session: userProps
+): Promise<addMenuState> {
+  try {
+    if (!menu_id || !session) {
+      return { success: false, message: "invalldate value" };
+    }
+    const tablName = "Manu";
+    const recordsGetDataMenu = JSON.stringify({ menu_id: [menu_id] });
+    const getMenu = await getGristRecords<Menu>(tablName, recordsGetDataMenu);
+    if (getMenu.length === 0) {
+      return { success: false, message: "Fail menu_id data not found." };
+    }
+    const recordsData = [
+      {
+        require: {
+          order_list: session.email,
+          order_name: getMenu[0]?.menu_name,
+        },
+        fields: {
+          order_name: getMenu[0]?.menu_name,
+          order_list: session.email,
+          buyer_list: session.buyer,
+          price_total: getMenu[0]?.menu_price,
+        },
+      },
+    ];
+    const records = JSON.stringify({ records: recordsData });
+    const updateOrder = await addGristRecord<Order>("Order", records);
+    if (updateOrder) {
+      return {
+        success: false,
+        message: "Failed to create order.",
+      };
+    }
+    const filter = JSON.stringify({
+      order_name: [getMenu[0]?.menu_name],
+      order_list: [session.email],
+    });
+    const getOrder = await getGristRecords<Order>("Order", filter);
+    if (getOrder.length === 0) {
+      return { success: false, message: "Failed to create order." };
+    }
+    const recordsDataOrder = [
+      {
+        require: {
+          material_id: crypto.randomUUID(), //
+        },
+        fields: {
+          material_name: getMenu[0]?.menu_name,
+          quantity: 1,
+          buyer: session.buyer,
+          order_id: getOrder[0]?.order_id,
+          order: session.email,
+          menu_id: getMenu[0]?.menu_id,
+          price: getMenu[0]?.menu_price,
+        },
+      },
+    ];
+
+    const recordsOrder = JSON.stringify({ records: recordsDataOrder });
+    const updateOrderDetail = await addGristRecord<Table1>(
+      "Table1",
+      recordsOrder
+    );
+    if (updateOrderDetail) {
+      return { success: false, message: "Failed to create order detail." };
+    }
+    return { success: true, message: "Order Add Successfuly." };
+  } catch (error) {
+    return { success: false, message: `Error :${error}` };
+  }
+}
+
+export async function deleteOrderAll(
+  delOrder: string
+): Promise<CreateOrderResult> {
+  try {
+    if (!delOrder) {
+      return { success: false, message: "Failed to delete order." };
+    }
+    const getOrder = await getGristRecords<Order>(
+      "Order",
+      JSON.stringify({ order_id: [delOrder] })
+    );
+    if (getOrder.length === 0) {
+      return { success: false, message: "Failed order id not found." };
+    }
+    const getOrderDetail = await getGristRecords<Table1>(
+      "Table1",
+      JSON.stringify({ order_id: [delOrder] })
+    );
+    if (getOrderDetail.length === 0) {
+      return { success: false, message: "Failed order detail not found." };
+    }
+    const arrayDelOrder = getOrder.map((items) => items.id);
+    const arrayDelOrderDetail = getOrderDetail.map((items) => items.id);
+    const deleteOrder = await delGristRecord<Order>(
+      "Order",
+      JSON.stringify(arrayDelOrder)
+    );
+    if (deleteOrder) {
+      return { success: false, message: "Failed to delete order." };
+    }
+    const deleteOrderDetail = await delGristRecord<Table1>(
+      "Table1",
+      JSON.stringify(arrayDelOrderDetail)
+    );
+    if (deleteOrderDetail) {
+      return { success: false, message: "Failed to delete order." };
+    }
+    return {
+      success: true,
+      message: `Order delete successfuly!`,
+    };
+  } catch (error) {
+    return { success: false, message: "Failed to delete order." };
+  }
+}
+
+export async function updateOrderStatus(
+  order_id: string
+): Promise<CreateOrderResult> {
+  try {
+    if (!order_id) {
+      return { success: false, message: "Invalidate data to create order." };
+    }
+    const recordsDataOrder = [
+      {
+        require: {
+          order_id: order_id, // Assuming order_id uniquely identifies the main order
+        },
+        fields: {
+          status: "success",
+        },
+      },
+    ];
+    const recordsOrder = JSON.stringify({ records: recordsDataOrder });
+    const updateOrderStatus = await addGristRecord<Order>(
+      "Order",
+      recordsOrder
+    );
+    if (updateOrderStatus !== null) {
+      return { success: false, message: "Fail Update Order Status." };
+    }
+    return {
+      success: true,
+      message: `Order update successfuly!`,
+    };
+  } catch (error) {
+    return { success: false, message: "Failed to create order." };
   }
 }

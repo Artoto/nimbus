@@ -14,10 +14,14 @@ import {
   DropdownMenu,
   Avatar,
   Button,
+  NavbarMenuToggle,
+  NavbarMenu,
+  NavbarMenuItem,
   Badge,
 } from "@nextui-org/react";
 import IconCart from "./IconCart";
 import { orderListCart } from "../actions/orderActions";
+import { usePathname } from "next/navigation";
 
 interface userProps {
   name?: string | null;
@@ -31,6 +35,14 @@ export default function Header() {
   const [countCart, setCountCart] = useState<number>(0);
   const { data: session, status } = useSession();
   const route = useRouter();
+  const pathName = usePathname();
+  const [isMenuOpen, setIsMenuOpen] = React.useState(false);
+  const menuItems = ["Manage Order", "Menu Order"];
+  const menuLinks = ["/manage", "menu"];
+  // Function to check if current path matches a base path (including subpaths)
+  const isPathActive = (basePath: string): boolean => {
+    return pathName.startsWith(basePath);
+  };
 
   const handleScroll = () => {
     const scrollPosition = window.scrollY;
@@ -53,26 +65,69 @@ export default function Header() {
 
   useEffect(() => {
     handleOrderCart();
-  }, [status]);
-
-  useEffect(() => {
     window.addEventListener("scroll", handleScroll);
     return () => {
-      window.addEventListener("scroll", handleScroll);
+      window.removeEventListener("scroll", handleScroll); // Fix: should be removeEventListener
     };
-  }, []);
+  }, [status]);
 
   return (
     <>
-      <Navbar className="bg-transparent shadow-lg py-5">
+      <Navbar
+        className="bg-transparent shadow-lg py-5"
+        isMenuOpen={isMenuOpen}
+        onMenuOpenChange={setIsMenuOpen}
+      >
+        <NavbarContent className="sm:hidden" justify="start">
+          <NavbarMenuToggle
+            aria-label={isMenuOpen ? "Close menu" : "Open menu"}
+          />
+        </NavbarContent>
+
+        <NavbarContent className="sm:hidden pr-3" justify="center">
+          <NavbarBrand>
+            <Link
+              href={status === "authenticated" ? `/profile` : `/`}
+              className="text-2xl sm:text-3xl font-extrabold text-gray-900"
+            >
+              Nimbus
+            </Link>
+          </NavbarBrand>
+        </NavbarContent>
+
         <NavbarBrand>
           <Link
             href={status === "authenticated" ? `/profile` : `/`}
-            className="text-2xl sm:text-3xl font-extrabold text-gray-900"
+            className="hidden sm:flex text-2xl sm:text-3xl font-extrabold text-gray-900"
           >
             Nimbus
           </Link>
         </NavbarBrand>
+        {status === "authenticated" && (
+          <NavbarContent className="hidden sm:flex gap-4" justify="center">
+            <NavbarItem isActive={isPathActive("/manage")}>
+              <Link
+                className={`text-gray-900 ${
+                  isPathActive("/manage") ? ` underline underline-offset-1` : ``
+                }`}
+                href="/manage"
+              >
+                Manage Order
+              </Link>
+            </NavbarItem>
+
+            <NavbarItem isActive={isPathActive("/menu")}>
+              <Link
+                className={`text-gray-900 ${
+                  isPathActive("/menu") ? ` underline underline-offset-1` : ``
+                }`}
+                href="/menu"
+              >
+                Menu Order
+              </Link>
+            </NavbarItem>
+          </NavbarContent>
+        )}
 
         <NavbarContent as="div" justify="end">
           {status === "authenticated" ? (
@@ -114,7 +169,7 @@ export default function Header() {
                   <DropdownItem
                     key="logout"
                     color="danger"
-                    onClick={() => signOut()}
+                    onPress={() => signOut()}
                   >
                     Log Out
                   </DropdownItem>
@@ -132,6 +187,20 @@ export default function Header() {
             )
           )}
         </NavbarContent>
+
+        <NavbarMenu className="mt-10">
+          {menuItems.map((item, index) => (
+            <NavbarMenuItem key={`${item}-${index}`}>
+              <Link
+                className="w-full"
+                color={"foreground"}
+                href={menuLinks[index]}
+              >
+                {item}
+              </Link>
+            </NavbarMenuItem>
+          ))}
+        </NavbarMenu>
       </Navbar>
     </>
   );
