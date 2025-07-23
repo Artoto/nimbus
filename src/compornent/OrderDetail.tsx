@@ -57,7 +57,7 @@ interface OrderProps {
   ordersDetail: OrderDetailType[];
   order_id: string;
   role?: string;
-  menu: Menu[];
+  menu?: Menu[];
 }
 
 interface addOrderProps {
@@ -351,7 +351,7 @@ export default function OrderDetailView({
             </div>
           </div>
           <div className="flex flex-col justify-center items-center w-full gap-4">
-            {menu.length > 0
+            {menu && menu.length > 0
               ? menu.map((menus, index) => (
                   <div
                     key={index}
@@ -525,7 +525,7 @@ export default function OrderDetailView({
                 onClick={
                   role === "buyer"
                     ? handleUpdateButtonClick
-                    : menu.length > 0 && role === "buyer"
+                    : menu && menu.length > 0 && role === "buyer"
                     ? handleUpdateStatusOrderMenu
                     : handleCreateButtonClick
                 }
