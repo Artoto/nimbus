@@ -400,6 +400,28 @@ export async function deleteOrder(delOrder: any[]): Promise<CreateOrderResult> {
   }
 }
 
+export async function deleteMenu(delOrder: any[]): Promise<CreateOrderResult> {
+  try {
+    if (delOrder.length === 0) {
+      return { success: false, message: "Failed to delete order." };
+    }
+
+    const deleteOrder = await delGristRecord<Menu_detail>(
+      "Menu_detail",
+      JSON.stringify(delOrder)
+    );
+    if (deleteOrder) {
+      return { success: false, message: "Failed to delete order." };
+    }
+    return {
+      success: true,
+      message: `Order delete successfuly!`,
+    };
+  } catch (error) {
+    return { success: false, message: "Failed to delete order." };
+  }
+}
+
 export async function createNewMenu(
   menuTitle: string,
   menu_id: string,
@@ -470,7 +492,9 @@ export async function createNewMenu(
           mo_quantity: item.quantity,
         },
       }));
+
       const recordsDetail = JSON.stringify({ records: recordsMenuDetail });
+
       const addMenuDetail = await addGristRecord<Menu_detail>(
         tableMenuDetail,
         recordsDetail

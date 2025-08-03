@@ -85,13 +85,17 @@ export async function getGristRecords<T>(
 ): Promise<T[]> {
   try {
     const apiUrl = getGristApiUrl(tableName, filter);
-    const response = await fetch(apiUrl, {
+    const myHeaders = new Headers();
+    myHeaders.append("accept", "application/json");
+    myHeaders.append("Authorization", `Bearer ${GRIST_API_KEY}`);
+    const requestOptions = {
       method: "GET",
-      headers: {
-        Authorization: `Bearer ${GRIST_API_KEY}`,
-        Accept: "application/json",
-      },
-    });
+      headers: myHeaders,
+      redirect: "follow" as RequestRedirect,
+      cache: "no-store" as RequestCache, // แก้ไขตรงนี้
+    };
+
+    const response = await fetch(apiUrl, requestOptions);
 
     if (!response.ok) {
       const errorText = await response.text();
@@ -100,7 +104,6 @@ export async function getGristRecords<T>(
       );
     }
     const data = await response.json();
-
     if (Array.isArray(data)) {
       return data as T[];
     }

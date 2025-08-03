@@ -129,7 +129,7 @@ export default function Header() {
           </NavbarContent>
         )}
 
-        <NavbarContent as="div" justify="end">
+        <NavbarContent as="div" justify="end" className="w-auto">
           {status === "authenticated" ? (
             <>
               <Badge
@@ -180,7 +180,7 @@ export default function Header() {
             status === "unauthenticated" && (
               <button
                 onClick={() => signIn()}
-                className="py-2 px-4 bg-white text-black hover:bg-gray-100/15 hover:text-white text-lg font-semibold rounded-xl hover:border border-solid border-white"
+                className="py-2 px-4 bg-white w-[90px] h-[50px] text-black hover:bg-gray-100/15 hover:text-white text-medium sm:text-lg font-semibold rounded-xl hover:border border-solid border-white"
               >
                 Sign In
               </button>

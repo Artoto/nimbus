@@ -4,7 +4,7 @@ import React, { useState, useEffect, Suspense } from "react"; // เพิ่ม
 import Link from "next/link";
 import IconArrowLeft from "./IconArrowLeft";
 import IconPlus from "./IconPlus";
-import { createNewMenu, deleteOrder } from "../actions/orderActions"; // <-- Import Server Action
+import { createNewMenu, deleteMenu } from "../actions/orderActions"; // <-- Import Server Action
 import IconTrash from "./IconTrash";
 import Loading from "@/app/loading";
 import Toast from "./Toast";
@@ -86,8 +86,6 @@ export default function MenuDetailView({
         user?.email === "nongponddee@gmail.com" ||
         user?.email === "supertoplnw001@gmail.com"
       ) {
-        console.log("menu", menu);
-        console.log("menusDetail", menusDetail);
         if (menu.length) {
           setOrderTitle(menu[0]?.menu_name);
         }
@@ -129,6 +127,7 @@ export default function MenuDetailView({
       setIsLoading(false);
       return false;
     }
+
     const result = await createNewMenu(orderTitle, menu_id, addMenu); // <-- เรียก Server Action
 
     if (result.success) {
@@ -202,7 +201,7 @@ export default function MenuDetailView({
     if (isCreate) {
       setIsLoading(true);
       const del = [...delOrder, addMenu[index].id];
-      const response = await deleteOrder(del);
+      const response = await deleteMenu(del);
       if (!response.success) {
         setStatusMessage(response.message);
         setIsError(true);
