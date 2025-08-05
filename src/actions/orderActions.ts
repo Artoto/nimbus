@@ -160,19 +160,42 @@ export async function createNewOrder(
           return { success: false, message: "Failed to update order name." };
         }
       }
+      const filter2 = JSON.stringify({
+        order_id: [order_id],
+        order: [session.email],
+      });
+      const getOrderDetail = await getGristRecords<Table1>("Table1", filter2);
+      const recordsDataOrderDetail = addOrder.map((item, index) => {
+        const data = getOrderDetail.filter(
+          (item2) => item2.material_name === item.material_name && item2
+        );
 
-      const recordsDataOrderDetail = addOrder.map((item) => ({
-        require: {
-          material_id: crypto.randomUUID(), //
-        },
-        fields: {
-          order_id: order_id,
-          material_name: item.material_name,
-          quantity: item.quantity,
-          buyer: session.buyer,
-          order: session.email,
-        },
-      }));
+        if (data.length > 0) {
+          return {
+            require: {
+              material_id: data[0]?.material_id,
+            },
+            fields: {
+              order_id: order_id,
+              material_name: item.material_name,
+              quantity: item.quantity,
+            },
+          };
+        } else {
+          return {
+            require: {
+              material_id: crypto.randomUUID(),
+            },
+            fields: {
+              order_id: order_id,
+              material_name: item.material_name,
+              quantity: item.quantity,
+              buyer: session.buyer,
+              order: session.email,
+            },
+          };
+        }
+      });
 
       const recordsOrderDetail = JSON.stringify({
         records: recordsDataOrderDetail,
@@ -228,6 +251,7 @@ export async function updateOrder(
       const data = getOrderDetail.filter(
         (item2) => item2.material_name === item.material_name && item2
       );
+
       if (data.length > 0) {
         return {
           require: {
@@ -250,6 +274,7 @@ export async function updateOrder(
         };
       }
     });
+
     const recordsOrderDetail = JSON.stringify({
       records: recordsDataOrderDeatil,
     });
